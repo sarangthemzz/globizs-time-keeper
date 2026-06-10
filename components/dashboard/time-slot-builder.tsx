@@ -420,7 +420,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                 </label>
                 <div className="h-10 flex items-center justify-between gap-2 px-2.5 bg-neutral-800 rounded-md font-mono text-sm text-slate-50 sm:gap-3 sm:px-4">
                   <span>{formatStartTimeForDisplay(slot.startTime)}</span>
-                  <span className="flex shrink-0 items-center gap-[0.28rem] text-sm font-semibold tracking-normal sm:gap-[0.5rem] sm:tracking-wide">
+                  <span className="flex shrink-0 items-center gap-[0.72rem] text-sm font-semibold tracking-normal sm:gap-[0.5rem] sm:tracking-wide">
                     {slotIndex === 0 ? (
                       <span className="text-slate-100">AM</span>
                     ) : (
@@ -475,7 +475,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                     onBlur={() => validateSlotEndTime(slot)}
                     className="font-mono bg-neutral-800 border-neutral-700 text-slate-50 placeholder:text-slate-500 h-10 pl-2.5 pr-[3.65rem] sm:pl-4 sm:pr-24"
                   />
-                  <span className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-[0.28rem] font-mono text-sm font-semibold tracking-normal sm:right-3 sm:gap-[0.5rem] sm:tracking-wide">
+                  <span className="absolute right-1.5 top-1/2 flex -translate-y-1/2 items-center gap-[0.72rem] font-mono text-sm font-semibold tracking-normal sm:right-3 sm:gap-[0.5rem] sm:tracking-wide">
                     <button
                       type="button"
                       onClick={() => updateSlotEndPeriod(slot.id, "AM")}
