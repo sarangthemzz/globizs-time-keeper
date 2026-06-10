@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int    @id @default(autoincrement())
+  fullName  String @map("full_name")
+  mobile    String @unique
+  password  String
+  isActive  Int    @default(1) @map("is_active")
+
+  timeLogs  TimeLog[]
+  locations UserLocation[]
+
+  @@map("user")
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  phone     String
+  otpCode   String   @map("otp_code")
+  verified  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  expiresAt DateTime? @map("expires_at")
+
+  @@index([phone, createdAt])
+  @@map("otp")
+}
+
+model TimeLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logDate   DateTime @map("log_date")
+  startTime String   @map("start_time")
+  endTime   String   @map("end_time")
+  work      String   @default("")
+  createdAt DateTime @default(now()) @map("created_at")
+  isActive  Int      @default(1) @map("is_active")
+
+  @@index([userId, logDate])
+  @@map("timelog")
+}
+
+model UserLocation {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  latitude   Float
+  longitude  Float
+  accuracy   Float?
+  placeName  String   @default("") @map("place_name")
+  recordedAt DateTime @default(now()) @map("recorded_at")
+
+  @@index([userId, recordedAt])
+  @@map("user_location")
+}

@@ -1,0 +1,23 @@
+"use client";
+
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import DashboardLayout from "@/components/dashboard/layout";
+
+export default function DashboardPage() {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  // If no session, navigate to sign‑in page on the client side
+  useEffect(() => {
+    if (!session) {
+      router.replace("/");
+    }
+  }, [session, router]);
+  if (!session) {
+    return null; // Avoid rendering layout while redirecting
+  }
+
+  return <DashboardLayout />;
+}

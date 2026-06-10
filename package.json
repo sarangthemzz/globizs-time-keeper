@@ -1,0 +1,53 @@
+{
+  "name": "globizs",
+  "version": "1.0.0",
+  "description": "Modern full-stack scheduling application",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:generate": "prisma generate",
+    "db:seed": "node prisma/seed.js",
+    "db:studio": "prisma studio",
+    "setup": "npm install && npm run db:generate && npm run db:push && npm run db:seed"
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.3.3",
+    "@hookform/resolvers": "^3.3.4",
+    "react-hook-form": "^7.48.0",
+    "zod": "^3.22.4",
+    "next-auth": "^5.0.0-beta.20",
+    "@prisma/client": "^5.7.1",
+    "tailwindcss": "^3.3.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.2.0",
+    "lucide-react": "^0.294.0",
+    "date-fns": "^2.30.0",
+    "react-day-picker": "^8.9.1",
+    "bcryptjs": "^2.4.3",
+    "sonner": "^1.2.0",
+    "@radix-ui/react-dialog": "^1.1.1",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-slot": "^1.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@types/bcryptjs": "^2.4.6",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "^15.0.0",
+    "prisma": "^5.7.1"
+  }
+}

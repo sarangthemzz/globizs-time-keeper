@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="frame" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10b981" />
+      <stop offset="0.55" stop-color="#4ade80" />
+      <stop offset="1" stop-color="#bef264" />
+    </linearGradient>
+    <linearGradient id="letter" x1="18" y1="18" x2="46" y2="46" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6ee7b7" />
+      <stop offset="1" stop-color="#d9f99d" />
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feColorMatrix
+        in="blur"
+        type="matrix"
+        values="0 0 0 0 0.0627 0 0 0 0 0.7255 0 0 0 0 0.5059 0 0 0 0.8 0"
+        result="glowColor"
+      />
+      <feMerge>
+        <feMergeNode in="glowColor" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="#020617" />
+  <rect x="8" y="8" width="48" height="48" rx="12" fill="url(#frame)" filter="url(#glow)" />
+  <rect x="12" y="12" width="40" height="40" rx="9" fill="#0a0a0a" />
+  <text
+    x="32"
+    y="43"
+    text-anchor="middle"
+    font-family="Inter, Arial, sans-serif"
+    font-size="34"
+    font-weight="800"
+    fill="url(#letter)"
+  >G</text>
+</svg>
