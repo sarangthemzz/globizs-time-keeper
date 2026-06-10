@@ -236,7 +236,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
     setSlots((prevSlots) =>
       prevSlots.map((slot) =>
         slot.id === slotId
-          ? { ...slot, endTime: null, endTimeInput: "", endTimePeriod: getTimePeriod(slot.startTime) }
+          ? { ...slot, endTime: null, endTimeInput: "", endTimePeriod: getTimePeriod(slot.startTime), workType: "" }
           : slot
       )
     );
@@ -253,7 +253,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
       if (slotIndex === 0) {
         return prevSlots.map((slot) =>
           slot.id === slotId
-            ? { ...slot, endTime: null, endTimeInput: "", endTimePeriod: getTimePeriod(slot.startTime) }
+            ? { ...slot, endTime: null, endTimeInput: "", endTimePeriod: getTimePeriod(slot.startTime), workType: "" }
             : slot
         );
       }
