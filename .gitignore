@@ -25,3 +25,4 @@ coverage/
 *.sqlite
 *.sqlite-journal
 tsconfig.tsbuildinfo
+.codex-ping-pages/
