@@ -121,7 +121,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
 
   useEffect(() => {
     setSlots([createSlot("1", getDefaultStartTime(selectedDate))]);
-    setFocusSlotId("1");
+    setFocusSlotId(null);
   }, [selectedDate]);
 
   useEffect(() => {
@@ -268,7 +268,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
 
   const resetSlots = useCallback(() => {
     setSlots([createSlot("1", getDefaultStartTime(selectedDate))]);
-    setFocusSlotId("1");
+    setFocusSlotId(null);
   }, [selectedDate]);
 
   const updateSlotWorkType = useCallback((slotId: string, workType: string) => {
