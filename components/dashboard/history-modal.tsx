@@ -99,7 +99,10 @@ export default function HistoryModal({ isOpen, onClose }: HistoryModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col border-neutral-800 bg-neutral-950 text-slate-100">
+      <DialogContent
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        className="max-w-2xl max-h-[80vh] flex flex-col border-neutral-800 bg-neutral-950 text-slate-100"
+      >
         <DialogHeader>
           <DialogTitle>Time Log History</DialogTitle>
           <DialogDescription>
