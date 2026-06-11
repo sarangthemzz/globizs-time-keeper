@@ -6,15 +6,20 @@ import { useRouter } from "next/navigation";
 import DashboardLayout from "@/components/dashboard/layout";
 
 export default function DashboardPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
   // If no session, navigate to sign‑in page on the client side
   useEffect(() => {
-    if (!session) {
+    if (status === "unauthenticated") {
       router.replace("/");
     }
-  }, [session, router]);
+  }, [status, router]);
+
+  if (status === "loading") {
+    return null;
+  }
+
   if (!session) {
     return null; // Avoid rendering layout while redirecting
   }
