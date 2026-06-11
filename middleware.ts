@@ -1,8 +1,10 @@
 import { auth } from "@/auth";
 
 export const middleware = auth((req) => {
+  const hasSignedInUser = Boolean(req.auth?.user?.id);
+
   if (req.nextUrl.pathname === "/") {
-    if (req.auth) {
+    if (hasSignedInUser) {
       const newUrl = new URL("/dashboard", req.nextUrl.origin);
       return Response.redirect(newUrl);
     }
@@ -11,7 +13,7 @@ export const middleware = auth((req) => {
   }
 
   if (req.nextUrl.pathname.startsWith("/dashboard")) {
-    if (!req.auth) {
+    if (!hasSignedInUser) {
       const newUrl = new URL("/", req.nextUrl.origin);
       return Response.redirect(newUrl);
     }
