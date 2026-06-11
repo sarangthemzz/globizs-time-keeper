@@ -260,3 +260,24 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 Built with ❤️ using Next.js 15
 # globizs-time-keeper
+
+
+# Database Configuration
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+
+# NextAuth Configuration
+NEXTAUTH_URL="https://your-production-domain.com"
+NEXTAUTH_SECRET="replace-with-a-secure-random-string"
+
+# Session Configuration
+SESSION_MAX_AGE=2592000
+
+# SMS OTP Configuration
+SMS_API_KEY="replace-with-your-sms-api-key"
+SMS_API_ROUTE="replace-with-your-sms-route"
+SMS_API_SENDER="replace-with-your-sms-sender"
+SMS_API_TEMPLATE_ID="replace-with-your-sms-template-id"
+SMS_API_HOSTNAME="replace-with-your-sms-hostname"
+
+# Geocoding Configuration
+NOMINATIM_USER_AGENT="Globizs/1.0 (local-development)"
