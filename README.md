@@ -263,21 +263,21 @@ Built with ❤️ using Next.js 15
 
 
 # Database Configuration
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+DATABASE_URL="postgresql://timekeeper_user:tImeKeeperV2026cx@m1.globizsapp.com:5432/timekeeper_db?schema=public"
 
 # NextAuth Configuration
-NEXTAUTH_URL="https://your-production-domain.com"
-NEXTAUTH_SECRET="replace-with-a-secure-random-string"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="globizs-dev-secret-key-2026"
 
 # Session Configuration
 SESSION_MAX_AGE=2592000
 
 # SMS OTP Configuration
-SMS_API_KEY="replace-with-your-sms-api-key"
-SMS_API_ROUTE="replace-with-your-sms-route"
-SMS_API_SENDER="replace-with-your-sms-sender"
-SMS_API_TEMPLATE_ID="replace-with-your-sms-template-id"
-SMS_API_HOSTNAME="replace-with-your-sms-hostname"
+SMS_API_KEY="9a36cd9c399bfff37d49652c7104972c"
+SMS_API_ROUTE="2"
+SMS_API_SENDER="GLOBIZ"
+SMS_API_TEMPLATE_ID="1507161778525538651"
+SMS_API_HOSTNAME="site.ping4sms.com"
 
 # Geocoding Configuration
 NOMINATIM_USER_AGENT="Globizs/1.0 (local-development)"
