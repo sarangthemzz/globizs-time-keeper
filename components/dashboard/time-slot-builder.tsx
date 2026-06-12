@@ -115,68 +115,15 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
     createSlot("1", getDefaultStartTime(selectedDate)),
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingExistingSubmission, setIsCheckingExistingSubmission] = useState(false);
-  const [hasExistingSubmission, setHasExistingSubmission] = useState(false);
   const [focusSlotId, setFocusSlotId] = useState<string | null>(null);
   const endTimeInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const hasStartedEnteringTime = slots.some((slot) => slot.endTimeInput.trim() || slot.endTime || slot.workType) || slots.length > 1;
-  const isTimeEntryDisabled = isSubmitting || isCheckingExistingSubmission || hasExistingSubmission;
+  const isTimeEntryDisabled = isSubmitting;
 
   useEffect(() => {
     setSlots([createSlot("1", getDefaultStartTime(selectedDate))]);
     setFocusSlotId(null);
   }, [selectedDate]);
-
-  useEffect(() => {
-    let ignoreResult = false;
-
-    if (!userId) {
-      setHasExistingSubmission(false);
-      setIsCheckingExistingSubmission(false);
-      return;
-    }
-
-    const selectedDateKey = formatDateForApi(selectedDate);
-
-    async function checkExistingSubmission() {
-      try {
-        setIsCheckingExistingSubmission(true);
-        setHasExistingSubmission(false);
-
-        const response = await fetch(`/api/timelog/user/${userId}`);
-        if (!response.ok) {
-          throw new Error("Failed to check existing time logs");
-        }
-
-        const timeLogs = await response.json() as Array<{ logDate: string }>;
-        const exists = timeLogs.some((timeLog) => timeLog.logDate.slice(0, 10) === selectedDateKey);
-
-        if (ignoreResult) return;
-
-        setHasExistingSubmission(exists);
-
-        if (exists) {
-          toast.warning("Time slots for the current date already exist");
-        }
-      } catch (error) {
-        console.error("Existing time log check failed:", error);
-
-        if (!ignoreResult) {
-          setHasExistingSubmission(false);
-        }
-      } finally {
-        if (!ignoreResult) {
-          setIsCheckingExistingSubmission(false);
-        }
-      }
-    }
-
-    void checkExistingSubmission();
-
-    return () => {
-      ignoreResult = true;
-    };
-  }, [selectedDate, userId]);
 
   useEffect(() => {
     if (!focusSlotId) return;
@@ -388,11 +335,6 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
   const handleSubmit = async () => {
     const completedSlots = slots.filter((slot) => slot.endTime);
 
-    if (hasExistingSubmission) {
-      toast.warning("Time slots for the current date already exist");
-      return;
-    }
-
     if (completedSlots.length === 0) {
       toast.error("Please fill at least one time slot before submitting");
       return;
@@ -603,11 +545,6 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
         <p className="text-xs text-slate-400 mt-4">
           Format: 12-hour time in IST (e.g., 09:30 AM, 02:45 PM)
         </p>
-        {hasExistingSubmission && (
-          <p role="alert" className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-200">
-            Time slots for the current date already exist.
-          </p>
-        )}
       </div>
 
       <div className="flex gap-3 justify-end">
@@ -628,7 +565,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
           className={`gap-2 font-semibold ${!isTimeEntryDisabled && !slots.every((s) => !s.endTime) ? "bg-green-700 text-white hover:bg-green-800" : "bg-gray-600 text-white/80 hover:bg-gray-700"}`}
         >
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          {isSubmitting ? "SUBMITTING..." : isCheckingExistingSubmission ? "CHECKING..." : hasExistingSubmission ? "ALREADY EXISTS" : "SUBMIT"}
+          {isSubmitting ? "SUBMITTING..." : "SUBMIT"}
         </Button>
       </div>
     </div>
