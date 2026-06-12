@@ -21,6 +21,9 @@ interface TimeSlotBuilderProps {
   selectedDate: Date;
   userId: number | null;
   latestLocation: TrackedLocation | null;
+  isDateLocked?: boolean;
+  isCheckingDate?: boolean;
+  onTimeLogSubmitted?: () => void;
 }
 
 const DEFAULT_START_TIME = "09:00";
@@ -110,7 +113,14 @@ const hasInvalidMinuteInput = (value: string) => {
   return Number(minuteDigits) >= 60;
 };
 
-export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }: TimeSlotBuilderProps) {
+export default function TimeSlotBuilder({
+  selectedDate,
+  userId,
+  latestLocation,
+  isDateLocked = false,
+  isCheckingDate = false,
+  onTimeLogSubmitted,
+}: TimeSlotBuilderProps) {
   const [slots, setSlots] = useState<TimeSlot[]>([
     createSlot("1", getDefaultStartTime(selectedDate)),
   ]);
@@ -118,7 +128,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
   const [focusSlotId, setFocusSlotId] = useState<string | null>(null);
   const endTimeInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const hasStartedEnteringTime = slots.some((slot) => slot.endTimeInput.trim() || slot.endTime || slot.workType) || slots.length > 1;
-  const isTimeEntryDisabled = isSubmitting;
+  const isTimeEntryDisabled = isSubmitting || isDateLocked || isCheckingDate;
 
   useEffect(() => {
     setSlots([createSlot("1", getDefaultStartTime(selectedDate))]);
@@ -335,6 +345,11 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
   const handleSubmit = async () => {
     const completedSlots = slots.filter((slot) => slot.endTime);
 
+    if (isDateLocked) {
+      toast.warning("Time slots for the current date already exist");
+      return;
+    }
+
     if (completedSlots.length === 0) {
       toast.error("Please fill at least one time slot before submitting");
       return;
@@ -379,6 +394,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
       }
 
       toast.success("Time log submitted successfully!");
+      onTimeLogSubmitted?.();
 
       // Reset form
       setSlots([
@@ -565,7 +581,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
           className={`gap-2 font-semibold ${!isTimeEntryDisabled && !slots.every((s) => !s.endTime) ? "bg-green-700 text-white hover:bg-green-800" : "bg-gray-600 text-white/80 hover:bg-gray-700"}`}
         >
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          {isSubmitting ? "SUBMITTING..." : "SUBMIT"}
+          {isSubmitting ? "SUBMITTING..." : isCheckingDate ? "CHECKING..." : isDateLocked ? "ALREADY EXISTS" : "SUBMIT"}
         </Button>
       </div>
     </div>

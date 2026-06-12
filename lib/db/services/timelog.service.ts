@@ -10,6 +10,7 @@ import {
 } from "../schemas/timelog";
 import { timeLogRepository } from "../repositories/timelog.repository";
 import { prisma } from "../prisma";
+import { syncTimeLogsToGoogleSheet } from "@/lib/google-sheets";
 
 function toDateOnly(value: Date) {
   return new Date(Date.UTC(value.getUTCFullYear(), value.getUTCMonth(), value.getUTCDate()));
@@ -116,6 +117,25 @@ export async function createManyTimeLogs(input: CreateManyTimeLogsInput) {
     timeLogRepository.deleteManyByUserAndDate(userId, normalizedLogDate),
     timeLogRepository.createMany(timeLogs),
   ]);
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { fullName: true },
+    });
+
+    await syncTimeLogsToGoogleSheet(
+      timeLogs.map((timeLog) => ({
+        username: user?.fullName ?? `User ${userId}`,
+        date: normalizedLogDate.toISOString().slice(0, 10),
+        startTime: timeLog.startTime,
+        endTime: timeLog.endTime,
+        work: timeLog.work,
+      }))
+    );
+  } catch (error) {
+    console.error("[GOOGLE SHEET SYNC ERROR]", error);
+  }
 
   let shortPlaceName = "";
 

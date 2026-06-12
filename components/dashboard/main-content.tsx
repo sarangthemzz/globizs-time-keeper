@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DateSelector from "./date-selector";
 import TimeSlotBuilder from "./time-slot-builder";
 import UserInfoModal from "./user-info-modal";
@@ -15,6 +15,9 @@ const getDisplayFirstName = (name?: string | null) => {
   return `${firstName.charAt(0).toUpperCase()}${firstName.slice(1).toLowerCase()}`;
 };
 
+const formatDateForApi = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
 interface MainContentProps {
   latestLocation: TrackedLocation | null;
 }
@@ -22,9 +25,58 @@ interface MainContentProps {
 export default function MainContent({ latestLocation }: MainContentProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isUserInfoOpen, setIsUserInfoOpen] = useState(false);
+  const [isCheckingExistingTimeLog, setIsCheckingExistingTimeLog] = useState(false);
+  const [hasExistingTimeLog, setHasExistingTimeLog] = useState(false);
   const { data: session } = useSession();
   const userId = session?.user?.id ? Number(session.user.id) : null;
   const displayName = getDisplayFirstName(session?.user?.name);
+
+  useEffect(() => {
+    let ignoreResult = false;
+
+    if (!userId) {
+      setHasExistingTimeLog(false);
+      setIsCheckingExistingTimeLog(false);
+      return;
+    }
+
+    const selectedDateKey = formatDateForApi(selectedDate);
+
+    async function checkExistingTimeLog() {
+      try {
+        setIsCheckingExistingTimeLog(true);
+        setHasExistingTimeLog(false);
+
+        const response = await fetch(`/api/timelog/user/${userId}`);
+        if (!response.ok) {
+          throw new Error("Failed to check existing time logs");
+        }
+
+        const timeLogs = await response.json() as Array<{ logDate: string }>;
+        const exists = timeLogs.some((timeLog) => timeLog.logDate.slice(0, 10) === selectedDateKey);
+
+        if (!ignoreResult) {
+          setHasExistingTimeLog(exists);
+        }
+      } catch (error) {
+        console.error("Existing time log check failed:", error);
+
+        if (!ignoreResult) {
+          setHasExistingTimeLog(false);
+        }
+      } finally {
+        if (!ignoreResult) {
+          setIsCheckingExistingTimeLog(false);
+        }
+      }
+    }
+
+    void checkExistingTimeLog();
+
+    return () => {
+      ignoreResult = true;
+    };
+  }, [selectedDate, userId]);
 
   return (
     <div className="h-full bg-neutral-950 overflow-y-auto p-2 text-slate-100 sm:p-6">
@@ -53,8 +105,22 @@ export default function MainContent({ latestLocation }: MainContentProps) {
           </p>
         </div>
 
-        <DateSelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
-        <TimeSlotBuilder selectedDate={selectedDate} userId={userId} latestLocation={latestLocation} />
+        <div className="space-y-3">
+          <DateSelector selectedDate={selectedDate} onDateChange={setSelectedDate} />
+          {hasExistingTimeLog && (
+            <p role="alert" className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-200">
+              Time slots for the current date already exist.
+            </p>
+          )}
+        </div>
+        <TimeSlotBuilder
+          selectedDate={selectedDate}
+          userId={userId}
+          latestLocation={latestLocation}
+          isDateLocked={hasExistingTimeLog}
+          isCheckingDate={isCheckingExistingTimeLog}
+          onTimeLogSubmitted={() => setHasExistingTimeLog(true)}
+        />
       </div>
       {session?.user && (
         <UserInfoModal
