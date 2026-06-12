@@ -115,14 +115,68 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
     createSlot("1", getDefaultStartTime(selectedDate)),
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingExistingSubmission, setIsCheckingExistingSubmission] = useState(false);
+  const [hasExistingSubmission, setHasExistingSubmission] = useState(false);
   const [focusSlotId, setFocusSlotId] = useState<string | null>(null);
   const endTimeInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const hasStartedEnteringTime = slots.some((slot) => slot.endTimeInput.trim() || slot.endTime || slot.workType) || slots.length > 1;
+  const isTimeEntryDisabled = isSubmitting || isCheckingExistingSubmission || hasExistingSubmission;
 
   useEffect(() => {
     setSlots([createSlot("1", getDefaultStartTime(selectedDate))]);
     setFocusSlotId(null);
   }, [selectedDate]);
+
+  useEffect(() => {
+    let ignoreResult = false;
+
+    if (!userId) {
+      setHasExistingSubmission(false);
+      setIsCheckingExistingSubmission(false);
+      return;
+    }
+
+    const selectedDateKey = formatDateForApi(selectedDate);
+
+    async function checkExistingSubmission() {
+      try {
+        setIsCheckingExistingSubmission(true);
+        setHasExistingSubmission(false);
+
+        const response = await fetch(`/api/timelog/user/${userId}`);
+        if (!response.ok) {
+          throw new Error("Failed to check existing time logs");
+        }
+
+        const timeLogs = await response.json() as Array<{ logDate: string }>;
+        const exists = timeLogs.some((timeLog) => timeLog.logDate.slice(0, 10) === selectedDateKey);
+
+        if (ignoreResult) return;
+
+        setHasExistingSubmission(exists);
+
+        if (exists) {
+          toast.warning("Time slots for the current date already exist");
+        }
+      } catch (error) {
+        console.error("Existing time log check failed:", error);
+
+        if (!ignoreResult) {
+          setHasExistingSubmission(false);
+        }
+      } finally {
+        if (!ignoreResult) {
+          setIsCheckingExistingSubmission(false);
+        }
+      }
+    }
+
+    void checkExistingSubmission();
+
+    return () => {
+      ignoreResult = true;
+    };
+  }, [selectedDate, userId]);
 
   useEffect(() => {
     if (!focusSlotId) return;
@@ -334,6 +388,11 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
   const handleSubmit = async () => {
     const completedSlots = slots.filter((slot) => slot.endTime);
 
+    if (hasExistingSubmission) {
+      toast.warning("Time slots for the current date already exist");
+      return;
+    }
+
     if (completedSlots.length === 0) {
       toast.error("Please fill at least one time slot before submitting");
       return;
@@ -428,6 +487,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                         <button
                           type="button"
                           onClick={() => updateSlotStartPeriod(slot.id, "AM")}
+                          disabled={isTimeEntryDisabled}
                           aria-pressed={getTimePeriod(slot.startTime) === "AM"}
                           className={getTimePeriod(slot.startTime) === "AM" ? "text-slate-100" : "text-slate-500 hover:text-slate-300"}
                         >
@@ -436,6 +496,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                         <button
                           type="button"
                           onClick={() => updateSlotStartPeriod(slot.id, "PM")}
+                          disabled={isTimeEntryDisabled}
                           aria-pressed={getTimePeriod(slot.startTime) === "PM"}
                           className={getTimePeriod(slot.startTime) === "PM" ? "text-slate-100" : "text-slate-500 hover:text-slate-300"}
                         >
@@ -459,6 +520,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                     maxLength={5}
                     placeholder="10:00"
                     value={slot.endTimeInput}
+                    disabled={isTimeEntryDisabled}
                     ref={(el) => {
                       endTimeInputRefs.current[slot.id] = el;
                     }}
@@ -479,6 +541,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                     <button
                       type="button"
                       onClick={() => updateSlotEndPeriod(slot.id, "AM")}
+                      disabled={isTimeEntryDisabled}
                       aria-pressed={slot.endTimePeriod === "AM"}
                       className={slot.endTimePeriod === "AM" ? "text-slate-100" : "text-slate-500 hover:text-slate-300"}
                     >
@@ -487,6 +550,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                     <button
                       type="button"
                       onClick={() => updateSlotEndPeriod(slot.id, "PM")}
+                      disabled={isTimeEntryDisabled}
                       aria-pressed={slot.endTimePeriod === "PM"}
                       className={slot.endTimePeriod === "PM" ? "text-slate-100" : "text-slate-500 hover:text-slate-300"}
                     >
@@ -506,6 +570,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                   type="text"
                   value={slot.workType}
                   onChange={(e) => updateSlotWorkType(slot.id, e.target.value)}
+                  disabled={isTimeEntryDisabled}
                   placeholder="Work"
                   className="h-10 bg-neutral-800 px-2 text-sm text-slate-50 placeholder:text-slate-500 border-neutral-700 sm:px-3"
                 />
@@ -515,6 +580,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
                 <Button
                   type="button"
                   aria-label={slotIndex === 0 ? "Clear end time" : "Clear time slot"}
+                  disabled={isTimeEntryDisabled}
                   onClick={() =>
                     slotIndex === 0
                       ? clearSlotEndTime(slot.id)
@@ -537,6 +603,11 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
         <p className="text-xs text-slate-400 mt-4">
           Format: 12-hour time in IST (e.g., 09:30 AM, 02:45 PM)
         </p>
+        {hasExistingSubmission && (
+          <p role="alert" className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-200">
+            Time slots for the current date already exist.
+          </p>
+        )}
       </div>
 
       <div className="flex gap-3 justify-end">
@@ -544,7 +615,7 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
           <Button
             type="button"
             onClick={resetSlots}
-            disabled={isSubmitting}
+            disabled={isTimeEntryDisabled}
             variant="outline"
             className="border-neutral-700 bg-neutral-950 text-slate-100 hover:bg-neutral-800 hover:text-white"
           >
@@ -553,11 +624,11 @@ export default function TimeSlotBuilder({ selectedDate, userId, latestLocation }
         )}
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || slots.every((s) => !s.endTime)}
-          className={`gap-2 font-semibold ${!isSubmitting && !slots.every((s) => !s.endTime) ? "bg-green-700 text-white hover:bg-green-800" : "bg-gray-600 text-white/80 hover:bg-gray-700"}`}
+          disabled={isTimeEntryDisabled || slots.every((s) => !s.endTime)}
+          className={`gap-2 font-semibold ${!isTimeEntryDisabled && !slots.every((s) => !s.endTime) ? "bg-green-700 text-white hover:bg-green-800" : "bg-gray-600 text-white/80 hover:bg-gray-700"}`}
         >
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
-          {isSubmitting ? "SUBMITTING..." : "SUBMIT"}
+          {isSubmitting ? "SUBMITTING..." : isCheckingExistingSubmission ? "CHECKING..." : hasExistingSubmission ? "ALREADY EXISTS" : "SUBMIT"}
         </Button>
       </div>
     </div>
